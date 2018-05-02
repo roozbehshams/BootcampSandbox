@@ -14,8 +14,8 @@
       <file leaf-file-name="MyFirstModule.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/MyFirstExtension/MyFirstModule/MyFirstModule.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="169">
-              <caret line="150" lean-forward="true" selection-start-line="150" selection-end-line="150" />
+            <state relative-caret-position="222">
+              <caret line="280" column="4" selection-start-line="280" selection-start-column="4" selection-end-line="280" selection-end-column="4" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -28,14 +28,16 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find>logic</find>
-      <find>run</find>
       <find>onselect</find>
       <find>onselec</find>
       <find>center</find>
-      <find>onapply</find>
       <find>setup</find>
       <find>parameters</find>
       <find>Onapply</find>
+      <find>output</find>
+      <find>onapply</find>
+      <find>run</find>
+      <find>numpy</find>
     </findStrings>
   </component>
   <component name="IdeDocumentHistory">
@@ -54,10 +56,11 @@
   <component name="NodePackageJsonFileManager">
     <packageJsonPaths />
   </component>
-  <component name="ProjectFrameBounds">
-    <option name="x" value="1905" />
-    <option name="width" value="1950" />
-    <option name="height" value="2075" />
+  <component name="ProjectFrameBounds" extendedState="7">
+    <option name="x" value="1852" />
+    <option name="y" value="-15" />
+    <option name="width" value="783" />
+    <option name="height" value="830" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -144,7 +147,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="762" y="0" width="780" height="830" extended-state="0" />
+    <frame x="-6" y="-6" width="1549" height="837" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -154,12 +157,12 @@
       <window_info anchor="bottom" id="Version Control" show_stripe_button="false" />
       <window_info anchor="bottom" id="Python Console" />
       <window_info anchor="bottom" id="Terminal" />
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.296875" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.14834093" />
       <window_info anchor="bottom" id="Docker" show_stripe_button="false" />
       <window_info anchor="right" id="Database" />
       <window_info anchor="right" id="SciView" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.36300418" />
+      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.23553719" />
       <window_info id="Favorites" side_tool="true" />
       <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -181,23 +184,18 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/MyFirstExtension/MyFirstModule/MyFirstModule.py</url>
-          <line>152</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/MyFirstExtension/MyFirstModule/MyFirstModule.py</url>
-          <line>257</line>
+          <line>260</line>
           <option name="timeStamp" value="5" />
         </line-breakpoint>
       </breakpoints>
-      <option name="time" value="6" />
+      <option name="time" value="7" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/MyFirstExtension/MyFirstModule/MyFirstModule.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="169">
-          <caret line="150" lean-forward="true" selection-start-line="150" selection-end-line="150" />
+        <state relative-caret-position="222">
+          <caret line="280" column="4" selection-start-line="280" selection-start-column="4" selection-end-line="280" selection-end-column="4" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>

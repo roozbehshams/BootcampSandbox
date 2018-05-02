@@ -74,7 +74,7 @@ class MyFirstModuleWidget(ScriptedLoadableModuleWidget):
     # output volume selector
     #
     self.outputSelector = slicer.qMRMLNodeComboBox()
-    self.outputSelector.nodeTypes = ["vtkMRMLScalarVolumeNode"]
+    self.outputSelector.nodeTypes = ["vtkMRMLModelNode"]
     self.outputSelector.selectNodeUponCreation = True
     self.outputSelector.addEnabled = True
     self.outputSelector.removeEnabled = True
@@ -82,8 +82,8 @@ class MyFirstModuleWidget(ScriptedLoadableModuleWidget):
     self.outputSelector.showHidden = False
     self.outputSelector.showChildNodeTypes = False
     self.outputSelector.setMRMLScene( slicer.mrmlScene )
-    self.outputSelector.setToolTip( "Pick the output to the algorithm." )
-    parametersFormLayout.addRow("Output Volume: ", self.outputSelector)
+    self.outputSelector.setToolTip( "Pick the model to the algorithm." )
+    parametersFormLayout.addRow("Output Model: ", self.outputSelector)
 
     #
     # threshold value
@@ -106,6 +106,7 @@ class MyFirstModuleWidget(ScriptedLoadableModuleWidget):
     self.observedMarkupNode = None
     self.markupsObserverTag = None
     self.enableScreenshotsFlagCheckBox.connect("toggled(bool)", self.onEnableAutoUpdate)
+
 
 
     #
@@ -154,8 +155,10 @@ class MyFirstModuleWidget(ScriptedLoadableModuleWidget):
     enableScreenshotsFlag = self.enableScreenshotsFlagCheckBox.checked
     imageThreshold = self.imageThresholdSliderWidget.value
     logic.run(self.inputSelector.currentNode(), self.outputSelector.currentNode(), imageThreshold,
-              enableScreenshotsFlag)
+              enableScreenshotsFlag )
     self.centreOfMassValueLabel.text = str(logic.centreOfMass)
+
+
 
 #
 # MyFirstModuleLogic
@@ -250,12 +253,34 @@ class MyFirstModuleLogic(ScriptedLoadableModuleLogic):
 
     return centreOfMass
 
-  def run(self, inputVolume, outputVolume, imageThreshold, enableScreenshots=0):
+  def run(self, inputFiducials, currentModel, imageThreshold, enableScreenshots=0):
     """
     Run the actual algorithm
     """
 
-    self.centreOfMass = self.getCentreOfMass(inputVolume)
+    self.centreOfMass = self.getCentreOfMass(inputFiducials)
+
+
+    import numpy as np
+    pos0 = [0,0,0]
+    pos1 = [0, 0, 0]
+
+    inputFiducials.GetNthFiducialPosition(0, pos0)
+    inputFiducials.GetNthFiducialPosition(1, pos1)
+
+    distanceOfFiducials = np.linalg.norm(np.array(pos1) - np.array(pos0))
+
+
+    sphereSource = vtk.vtkSphereSource()
+    sphereSource.SetCenter(self.centreOfMass)
+    sphereSource.SetRadius(distanceOfFiducials/2.0)
+    sphereSource.Update()
+
+    currentModel.SetAndObservePolyData(sphereSource.GetOutput())
+    currentModelDisplayNode = currentModel.GetDisplayNode()
+    if currentModelDisplayNode:
+      currentModelDisplayNode.SetColor(1,0,0)
+
 
     logging.info('Processing completed')
 
