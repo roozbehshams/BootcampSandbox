@@ -15,7 +15,7 @@ class MyFirstModule(ScriptedLoadableModule):
 
   def __init__(self, parent):
     ScriptedLoadableModule.__init__(self, parent)
-    self.parent.title = "MyFirstModule" # TODO make this more human readable by adding spaces
+    self.parent.title = "Centre of Mass" # TODO make this more human readable by adding spaces
     self.parent.categories = ["Examples"]
     self.parent.dependencies = []
     self.parent.contributors = ["John Doe (AnyWare Corp.)"] # replace with "Firstname Lastname (Organization)"
@@ -41,6 +41,8 @@ class MyFirstModuleWidget(ScriptedLoadableModuleWidget):
   def setup(self):
     ScriptedLoadableModuleWidget.setup(self)
 
+
+
     # Instantiate and connect widgets ...
 
     #
@@ -57,9 +59,9 @@ class MyFirstModuleWidget(ScriptedLoadableModuleWidget):
     # input volume selector
     #
     self.inputSelector = slicer.qMRMLNodeComboBox()
-    self.inputSelector.nodeTypes = ["vtkMRMLScalarVolumeNode"]
+    self.inputSelector.nodeTypes = ["vtkMRMLMarkupsFiducialNode"]
     self.inputSelector.selectNodeUponCreation = True
-    self.inputSelector.addEnabled = False
+    self.inputSelector.addEnabled = True
     self.inputSelector.removeEnabled = False
     self.inputSelector.noneEnabled = False
     self.inputSelector.showHidden = False
@@ -99,8 +101,12 @@ class MyFirstModuleWidget(ScriptedLoadableModuleWidget):
     #
     self.enableScreenshotsFlagCheckBox = qt.QCheckBox()
     self.enableScreenshotsFlagCheckBox.checked = 0
-    self.enableScreenshotsFlagCheckBox.setToolTip("If checked, take screen shots for tutorials. Use Save Data to write them to disk.")
-    parametersFormLayout.addRow("Enable Screenshots", self.enableScreenshotsFlagCheckBox)
+    self.enableScreenshotsFlagCheckBox.setToolTip("Enable auto-update")
+    parametersFormLayout.addRow("Auto-update", self.enableScreenshotsFlagCheckBox)
+    self.observedMarkupNode = None
+    self.markupsObserverTag = None
+    self.enableScreenshotsFlagCheckBox.connect("toggled(bool)", self.onEnableAutoUpdate)
+
 
     #
     # Apply Button
@@ -109,6 +115,9 @@ class MyFirstModuleWidget(ScriptedLoadableModuleWidget):
     self.applyButton.toolTip = "Run the algorithm."
     self.applyButton.enabled = False
     parametersFormLayout.addRow(self.applyButton)
+
+    self.centreOfMassValueLabel = qt.QLabel()
+    parametersFormLayout.addRow("Center of mass", self.centreOfMassValueLabel)
 
     # connections
     self.applyButton.connect('clicked(bool)', self.onApplyButton)
@@ -125,13 +134,28 @@ class MyFirstModuleWidget(ScriptedLoadableModuleWidget):
     pass
 
   def onSelect(self):
-    self.applyButton.enabled = self.inputSelector.currentNode() and self.outputSelector.currentNode()
+    self.applyButton.enabled = self.inputSelector.currentNode()
+
+  def onEnableAutoUpdate(self, autoUpdate):
+    if self.markupsObserverTag:
+      self.observedMarkupNode.RemoveObserver(self.markupsObserverTag)
+      self.observedMarkupNode = None
+      self.markupsObserverTag = None
+    if autoUpdate and self.inputSelector.currentNode:
+      self.observedMarkupNode = self.inputSelector.currentNode()
+      self.markupsObserverTag = self.observedMarkupNode.AddObserver(
+        vtk.vtkCommand.ModifiedEvent, self.onMarkupsUpdated)
+
+  def onMarkupsUpdated(self, caller=None, event=None):
+    self.onApplyButton()
 
   def onApplyButton(self):
     logic = MyFirstModuleLogic()
     enableScreenshotsFlag = self.enableScreenshotsFlagCheckBox.checked
     imageThreshold = self.imageThresholdSliderWidget.value
-    logic.run(self.inputSelector.currentNode(), self.outputSelector.currentNode(), imageThreshold, enableScreenshotsFlag)
+    logic.run(self.inputSelector.currentNode(), self.outputSelector.currentNode(), imageThreshold,
+              enableScreenshotsFlag)
+    self.centreOfMassValueLabel.text = str(logic.centreOfMass)
 
 #
 # MyFirstModuleLogic
@@ -210,24 +234,28 @@ class MyFirstModuleLogic(ScriptedLoadableModuleLogic):
     annotationLogic = slicer.modules.annotations.logic()
     annotationLogic.CreateSnapShot(name, description, type, 1, imageData)
 
+  def getCentreOfMass(self, markupsNode):
+    centreOfMass = [0, 0, 0]
+
+    import numpy as np
+    sumPos = np.zeros(3)
+    for i in range(markupsNode.GetNumberOfMarkups()):
+      pos = np.zeros(3)
+      markupsNode.GetNthFiducialPosition(i, pos)
+      sumPos += pos
+
+    centreOfMass = sumPos / markupsNode.GetNumberOfMarkups()
+
+    logging.info('Centre of mass for \'' + markupsNode.GetName() + '\': ' + repr(centreOfMass))
+
+    return centreOfMass
+
   def run(self, inputVolume, outputVolume, imageThreshold, enableScreenshots=0):
     """
     Run the actual algorithm
     """
 
-    if not self.isValidInputOutputData(inputVolume, outputVolume):
-      slicer.util.errorDisplay('Input volume is the same as output volume. Choose a different output volume.')
-      return False
-
-    logging.info('Processing started')
-
-    # Compute the thresholded output volume using the Threshold Scalar Volume CLI module
-    cliParams = {'InputVolume': inputVolume.GetID(), 'OutputVolume': outputVolume.GetID(), 'ThresholdValue' : imageThreshold, 'ThresholdType' : 'Above'}
-    cliNode = slicer.cli.run(slicer.modules.thresholdscalarvolume, None, cliParams, wait_for_completion=True)
-
-    # Capture screenshot
-    if enableScreenshots:
-      self.takeScreenshot('MyFirstModuleTest-Start','MyScreenshot',-1)
+    self.centreOfMass = self.getCentreOfMass(inputVolume)
 
     logging.info('Processing completed')
 
@@ -245,6 +273,8 @@ class MyFirstModuleTest(ScriptedLoadableModuleTest):
     """ Do whatever is needed to reset the state - typically a scene clear will be enough.
     """
     slicer.mrmlScene.Clear(0)
+    self.centreOfMassValueLabel = qt.QLabel()
+    parametersFormLayout.addRow("Center of mass", self.centreOfMassValueLabel)
 
   def runTest(self):
     """Run as few or as many tests as needed here.
